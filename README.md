@@ -3,7 +3,23 @@ imgu is a small utility/wrapper inspired by [Wolfsurge's NVGU](https://github.co
 It is designed to be as simple as possible, and to be as close to the original imgui API as possible, while still providing some useful features (such as not having to write imgui::SameLine all the time).
 
 ## Usage
+```groovy
+// build.gradle
+// ...
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+project.ext.imgu_version = "2255970ab9"
+
+dependencies {
+    implementation "com.github.grngxd:imgu:${imgu_version}"
+}
+// ...
+```
+
 ```kt
+// Main.kt
 import cc.grng.imgu.IMGU;
 
 fun main() {
