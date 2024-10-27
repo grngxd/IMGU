@@ -7,6 +7,10 @@ import imgui.flag.ImGuiCol
 import imgui.flag.ImGuiConfigFlags
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
+import imgui.type.ImBoolean
+import imgui.type.ImFloat
+import imgui.type.ImInt
+import imgui.type.ImString
 import org.lwjgl.glfw.GLFW
 import java.io.InputStream
 
@@ -27,12 +31,12 @@ class IMGU(val handle: Long = -1L) {
     // Initialization
     open fun create(): IMGU {
         if (created) {
-            throw IllegalStateException("IMGU has already been initialized.")
+            throw IllegalStateException("[IMGU] IMGU has already been initialized.")
         }
 
         created = true
         if (handle == -1L) {
-            throw IllegalStateException("Display Handle provided is invalid. Has the display been created?")
+            throw IllegalStateException("[IMGU] Display Handle provided is invalid. Has the display been created?")
         }
 
         ImGui.createContext()
@@ -51,7 +55,6 @@ class IMGU(val handle: Long = -1L) {
                 sizes.forEach { (sizeName, size) ->
                     val imFont = fontAtlas.addFontFromMemoryTTF(fontData, size, fontConfig)
                     fontMap[sizeName] = imFont
-                    println("Loaded font: $name, size: $sizeName")
                 }
             }
             imFonts[name] = fontMap
@@ -70,7 +73,7 @@ class IMGU(val handle: Long = -1L) {
         imGuiGl3.init()
         val initialized = imGuiGlfw.init(handle, true)
         if (!initialized) {
-            throw IllegalStateException("Failed to initialize ImGui")
+            throw IllegalStateException("[IMGU] Failed to initialize ImGui")
         }
 
         return this
@@ -129,21 +132,6 @@ class IMGU(val handle: Long = -1L) {
     }
 
     // Utility Methods
-    fun button(label: String, r: Runnable) {
-        if (ImGui.button(label)) {
-            r.run()
-        }
-    }
-
-    fun inline(vararg runnables: Runnable) {
-        runnables.forEachIndexed { index, runnable ->
-            runnable.run()
-            if (index < runnables.size) {
-                ImGui.sameLine()
-            }
-        }
-    }
-
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, size: Pair<Float, Float>, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second)
         ImGui.setNextWindowSize(size.first, size.second)
@@ -174,5 +162,82 @@ class IMGU(val handle: Long = -1L) {
 
     fun window(r: Runnable) {
         window("Window", r)
+    }
+
+    fun button(label: String, r: Runnable) {
+        if (ImGui.button(label)) {
+            r.run()
+        }
+    }
+
+    fun text(text: String, color: Int = 0xFFFFFFFF.toInt(), wrapped: Boolean = false) {
+        ImGui.pushStyleColor(ImGuiCol.Text, color)
+        if (wrapped) {
+            ImGui.textWrapped(text)
+        } else {
+            ImGui.text(text)
+        }
+        ImGui.popStyleColor()
+    }
+
+    fun input(label: String, value: ImString) {
+        ImGui.inputText(label, value)
+    }
+
+    fun input(label: String, value: ImInt) {
+        ImGui.inputInt(label, value)
+    }
+
+    fun input(label: String, value: ImFloat) {
+        ImGui.inputFloat(label, value)
+    }
+
+    fun slider(label: String, value: IntArray, min: Int, max: Int, format: String) {
+        ImGui.sliderInt(label, value, min, max)
+    }
+
+    fun slider(label: String, value: FloatArray, min: Float, max: Float, format: String) {
+        ImGui.sliderFloat(label, value, min, max)
+    }
+
+    fun slider(label: String, value: IntArray, min: Int, max: Int) {
+        ImGui.sliderInt(label, value, min, max)
+    }
+
+    fun slider(label: String, value: FloatArray, min: Float, max: Float) {
+        ImGui.sliderFloat(label, value, min, max)
+    }
+
+
+    fun checkbox(label: String, value: ImBoolean, r: Runnable) {
+        if (ImGui.checkbox(label, value)) {
+            r.run()
+        }
+    }
+
+    fun separator() {
+        ImGui.separator()
+    }
+
+    fun separator(vararg runnables: Runnable) {
+        runnables.forEachIndexed { index, runnable ->
+            runnable.run()
+            if (index < runnables.size) {
+                ImGui.separator()
+            }
+        }
+    }
+
+    fun inline(vararg runnables: Runnable) {
+        runnables.forEachIndexed { index, runnable ->
+            runnable.run()
+            if (index < runnables.size) {
+                ImGui.sameLine()
+            }
+        }
+    }
+
+    fun sameLine(vararg runnables: Runnable) {
+        inline(*runnables)
     }
 }
