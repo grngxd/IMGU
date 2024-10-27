@@ -1,4 +1,4 @@
-import cc.grng.cc.grng.imgu.IMGU
+import cc.grng.imgu.IMGU
 import imgui.ImGui
 import org.junit.jupiter.api.Test
 import org.lwjgl.glfw.*
