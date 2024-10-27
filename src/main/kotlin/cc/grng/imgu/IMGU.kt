@@ -1,4 +1,4 @@
-package cc.grng
+package cc.grng.cc.grng.imgu
 
 import imgui.ImFont
 import imgui.ImFontConfig

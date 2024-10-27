@@ -1,8 +1,9 @@
 plugins {
     kotlin("jvm") version "2.0.0"
+    id("maven-publish")
 }
 
-group = "cc.grng"
+group = "cc.grng.imgu"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -27,4 +28,18 @@ tasks.test {
 
 kotlin {
     jvmToolchain(21)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "cc.grng.imgu"
+            artifactId = "IMGU"
+            version = "1.0-SNAPSHOT"
+
+            afterEvaluate {
+                from(components["java"])
+            }
+        }
+    }
 }
