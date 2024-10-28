@@ -131,6 +131,21 @@ class IMGU(val handle: Long = -1L) {
         imGuiGl3.renderDrawData(ImGui.getDrawData())
     }
 
+    fun newFrame() {
+        val width = IntArray(1)
+        val height = IntArray(1)
+        GLFW.glfwGetFramebufferSize(handle, width, height)
+        ImGui.getIO().setDisplaySize(width[0].toFloat(), height[0].toFloat())
+
+        imGuiGlfw.newFrame()
+        ImGui.newFrame()
+    }
+
+    fun endFrame() {
+        ImGui.render()
+        imGuiGl3.renderDrawData(ImGui.getDrawData())
+    }
+
     // Utility Methods
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, size: Pair<Float, Float>, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second)
