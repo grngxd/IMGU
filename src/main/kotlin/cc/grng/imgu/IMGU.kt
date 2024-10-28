@@ -8,13 +8,13 @@ import imgui.flag.ImGuiConfigFlags
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.internal.ImGuiContext
-import imgui.type.ImBoolean
-import imgui.type.ImFloat
-import imgui.type.ImInt
-import imgui.type.ImString
+import imgui.type.*
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.stb.STBImage.*
 import java.awt.Color
 import java.io.InputStream
+import java.nio.ByteBuffer
 
 class IMGU(val handle: Long = -1L) {
 
@@ -93,8 +93,86 @@ class IMGU(val handle: Long = -1L) {
         ImGui.destroyContext()
     }
 
+    // Images
+    // each image's key is the name of the image
+    // and the value is the id of the image (int), the width and the height
+//    in js it would be [
+//            "name": {
+//                "id": 1,
+//                "width": 100,
+//                "height": 100
+//            }
+//    ]
+    val images: HashMap<String, Map<String, Int>> = hashMapOf()
+
+    fun createImageFromMemory(name: String, buffer: ByteBuffer): Map<String, Int> {
+        // Initialize width and height arrays
+        val widthArr = IntArray(1)
+        val heightArr = IntArray(1)
+        val compArr = IntArray(1)
+
+        // Load image from memory
+        val image = stbi_load_from_memory(buffer, widthArr, heightArr, compArr, 4)
+        if (image == null) {
+            throw IllegalStateException("Failed to load image: ${stbi_failure_reason()}")
+        }
+
+        val width = widthArr[0]
+        val height = heightArr[0]
+
+        // Generate texture ID
+        val id = glGenTextures()
+        glBindTexture(GL_TEXTURE_2D, id)
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+        // Upload texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image)
+
+        // Free the image memory
+        stbi_image_free(image)
+
+        return mapOf(
+            "id" to id,
+            "width" to width,
+            "height" to height
+        )
+    }
+
+    fun createImage(name: String, stream: InputStream): IMGU {
+        val bytes = stream.readBytes()
+        val buffer = ByteBuffer.allocateDirect(bytes.size).apply {
+            put(bytes)
+            flip() // Ensure the buffer is ready for reading
+        }
+
+        val i = createImageFromMemory(name, buffer)
+        images[name] = i
+
+        return this
+    }
+
+    fun image(name: String, wh: Pair<Float, Float>): Map<String, Any> {
+        val image = images[name] ?: throw IllegalArgumentException("Image $name not found")
+        val id = image["id"] ?: throw IllegalArgumentException("Image $name does not have an id")
+        val imgWidth = image["width"] ?: throw IllegalArgumentException("Image $name does not have a width")
+        val imgHeight = image["height"] ?: throw IllegalArgumentException("Image $name does not have a height")
+
+        ImGui.image(id, wh.first, wh.second, 0f, 1f, 1f, 0f)
+
+        return mapOf(
+            "id" to id,
+            "width" to imgWidth,
+            "height" to imgHeight,
+            "renderedWidth" to wh.first,
+            "renderedHeight" to wh.second
+        )
+    }
+
     // Font Management
-    open fun createFont(name: String, font: InputStream, sizes: HashMap<String, Float>): IMGU {
+    fun createFont(name: String, font: InputStream, sizes: HashMap<String, Float>): IMGU {
         if (created) {
             throw IllegalStateException("[IMGU] Cannot create font after IMGU has been initialized")
         }

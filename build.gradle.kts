@@ -16,10 +16,23 @@ dependencies {
 
     implementation("com.github.SpaiR.imgui-java:imgui-java-app:v1.86.11")
 
-    // Include devmodules only during development
-    if (project.hasProperty("dev")) {
-        implementation(project(":dev"))
-    }
+    compileOnly("org.lwjgl:lwjgl:3.3.3")
+    compileOnly("org.lwjgl:lwjgl-glfw:3.3.3")
+    compileOnly("org.lwjgl:lwjgl-opengl:3.3.3")
+    compileOnly("org.lwjgl:lwjgl-stb:3.3.3")
+    compileOnly("org.lwjgl:lwjgl:3.3.3:natives-windows")
+    compileOnly("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows")
+    compileOnly("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows")
+    compileOnly("org.lwjgl:lwjgl-stb:3.3.3:natives-windows")
+
+    testImplementation("org.lwjgl:lwjgl:3.3.3")
+    testImplementation("org.lwjgl:lwjgl-glfw:3.3.3")
+    testImplementation("org.lwjgl:lwjgl-opengl:3.3.3")
+    testImplementation("org.lwjgl:lwjgl-stb:3.3.3")
+    testImplementation("org.lwjgl:lwjgl:3.3.3:natives-windows")
+    testImplementation("org.lwjgl:lwjgl-glfw:3.3.3:natives-windows")
+    testImplementation("org.lwjgl:lwjgl-opengl:3.3.3:natives-windows")
+    testImplementation("org.lwjgl:lwjgl-stb:3.3.3:natives-windows")
 
     compileOnly("org.projectlombok:lombok:1.18.28")
     annotationProcessor("org.projectlombok:lombok:1.18.28")

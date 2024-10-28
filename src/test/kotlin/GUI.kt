@@ -33,6 +33,10 @@ class GUI {
         GL.createCapabilities()
 
         val i = IMGU(handle)
+            .createImage(
+                "image",
+                GUI::class.java.getResourceAsStream("/image.jpg")!!
+            )
             .createFont(
                 "Roboto",
                 GUI::class.java.getResourceAsStream("/Roboto.ttf")!!,
@@ -73,6 +77,14 @@ class GUI {
                             { ImGui.text("Count: $counter") },
                             { i.button("+") { counter++ } }
                         )
+                    }
+
+                    i.window("Image", Pair(120f, 150f)) {
+                        val img = i.image("image", Pair(100f, 100f))
+                        if (img != null) {
+                            ImGui.text("Image size: ${img["width"]}x${img["height"]} (${img["renderedWidth"]}x${img["renderedHeight"]})")
+                            ImGui.text("ID: ${img["id"]}")
+                        }
                     }
 
                     ImGui.showDemoWindow()
