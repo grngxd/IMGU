@@ -4,6 +4,7 @@ import imgui.ImFont
 import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.flag.ImGuiCol
+import imgui.flag.ImGuiCond
 import imgui.flag.ImGuiConfigFlags
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
@@ -94,18 +95,9 @@ class IMGU(val handle: Long = -1L) {
     }
 
     // Images
-    // each image's key is the name of the image
-    // and the value is the id of the image (int), the width and the height
-//    in js it would be [
-//            "name": {
-//                "id": 1,
-//                "width": 100,
-//                "height": 100
-//            }
-//    ]
-    val images: HashMap<String, Map<String, Int>> = hashMapOf()
+    val images: HashMap<String, Map<String, Any>> = hashMapOf()
 
-    fun createImageFromMemory(name: String, buffer: ByteBuffer): Map<String, Int> {
+    fun createImageFromMemory(name: String, buffer: ByteBuffer): Map<String, Any> {
         // Initialize width and height arrays
         val widthArr = IntArray(1)
         val heightArr = IntArray(1)
@@ -137,7 +129,8 @@ class IMGU(val handle: Long = -1L) {
         return mapOf(
             "id" to id,
             "width" to width,
-            "height" to height
+            "height" to height,
+            "aspectRatio" to (width.toFloat() / height.toFloat())
         )
     }
 
@@ -154,21 +147,8 @@ class IMGU(val handle: Long = -1L) {
         return this
     }
 
-    fun image(name: String, wh: Pair<Float, Float>): Map<String, Any> {
-        val image = images[name] ?: throw IllegalArgumentException("Image $name not found")
-        val id = image["id"] ?: throw IllegalArgumentException("Image $name does not have an id")
-        val imgWidth = image["width"] ?: throw IllegalArgumentException("Image $name does not have a width")
-        val imgHeight = image["height"] ?: throw IllegalArgumentException("Image $name does not have a height")
-
-        ImGui.image(id, wh.first, wh.second, 0f, 1f, 1f, 0f)
-
-        return mapOf(
-            "id" to id,
-            "width" to imgWidth,
-            "height" to imgHeight,
-            "renderedWidth" to wh.first,
-            "renderedHeight" to wh.second
-        )
+    fun getImage(name: String): Map<String, Any> {
+        return images[name]!!
     }
 
     // Font Management
@@ -278,20 +258,18 @@ class IMGU(val handle: Long = -1L) {
 
     // Utility Methods
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, size: Pair<Float, Float>, r: Runnable) {
-        ImGui.setNextWindowPos(pos.first, pos.second)
-        ImGui.setNextWindowSize(size.first, size.second)
-        window(name, flags, r)
+        window(name, flags, pos, ImGuiCond.Once, size, r)
     }
 
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, cond: Int, size: Pair<Float, Float>,  r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second, cond)
-        ImGui.setNextWindowSize(size.first, size.second)
+        ImGui.setNextWindowSize(size.first, size.second, cond)
         window(name, flags, r)
     }
 
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, pivot: Pair<Float, Float>, cond: Int, size: Pair<Float, Float>, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second, cond, pivot.first, pivot.second)
-        ImGui.setNextWindowSize(size.first, size.second)
+        ImGui.setNextWindowSize(size.first, size.second, cond)
         window(name, flags, r)
     }
 
@@ -300,8 +278,7 @@ class IMGU(val handle: Long = -1L) {
     }
 
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, r: Runnable) {
-        ImGui.setNextWindowPos(pos.first, pos.second)
-        window(name, flags, r)
+        window(name, flags, pos, r)
     }
 
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, cond: Int, r: Runnable) {
@@ -315,10 +292,7 @@ class IMGU(val handle: Long = -1L) {
 
     // you can pass a pair by doing Pair(1f, 1f)
     fun window(name: String, pos: Pair<Float, Float>, r: Runnable) {
-        ImGui.setNextWindowPos(pos.first, pos.second)
-        ImGui.begin(name)
-        r.run()
-        ImGui.end()
+        window(name, 0, pos, ImGuiCond.Once, r)
     }
 
     fun window(name: String, flags: Int, r: Runnable) {
@@ -410,5 +384,41 @@ class IMGU(val handle: Long = -1L) {
 
     fun sameLine(vararg runnables: Runnable) {
         inline(*runnables)
+    }
+
+    fun image(name: String, wh: Pair<Float, Float>): Map<String, Any> {
+        val image = images[name] ?: throw IllegalArgumentException("Image $name not found")
+        val id = image["id"] ?: throw IllegalArgumentException("Image $name does not have an id")
+        val imgWidth = image["width"] ?: throw IllegalArgumentException("Image $name does not have a width")
+        val imgHeight = image["height"] ?: throw IllegalArgumentException("Image $name does not have a height")
+
+        ImGui.image(id as Int, wh.first, wh.second)
+
+        return mapOf(
+            "id" to id,
+            "width" to imgWidth,
+            "height" to imgHeight,
+            "renderedWidth" to wh.first,
+            "renderedHeight" to wh.second,
+            "aspectRatio" to (imgWidth as Int / imgHeight as Int).toFloat()
+        )
+    }
+
+    fun imageButton(name: String, wh: Pair<Float, Float>, r: Runnable): Map<String, Any> {
+        val image = images[name] ?: throw IllegalArgumentException("Image $name not found")
+        val id = image["id"] ?: throw IllegalArgumentException("Image $name does not have an id")
+        val imgWidth = image["width"] ?: throw IllegalArgumentException("Image $name does not have a width")
+        val imgHeight = image["height"] ?: throw IllegalArgumentException("Image $name does not have a height")
+
+        ImGui.imageButton(id as Int, wh.first, wh.second)
+
+        return mapOf(
+            "id" to id,
+            "width" to imgWidth,
+            "height" to imgHeight,
+            "renderedWidth" to wh.first,
+            "renderedHeight" to wh.second,
+            "aspectRatio" to (imgWidth as Int / imgHeight as Int).toFloat()
+        )
     }
 }

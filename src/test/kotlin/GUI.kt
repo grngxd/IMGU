@@ -11,17 +11,6 @@ import java.awt.Font.createFont
 
 class GUI {
 
-
-    /*
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-        !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
-     */
-
     @Test
     fun windowTest() {
         if (!GLFW.glfwInit()) {
@@ -79,12 +68,14 @@ class GUI {
                         )
                     }
 
-                    i.window("Image", Pair(120f, 150f)) {
+                    i.window("Image", Pair(60f, 300f)) {
                         val img = i.image("image", Pair(100f, 100f))
                         if (img != null) {
                             ImGui.text("Image size: ${img["width"]}x${img["height"]} (${img["renderedWidth"]}x${img["renderedHeight"]})")
                             ImGui.text("ID: ${img["id"]}")
+                            ImGui.text("Aspect Ratio: ${img["aspectRatio"]}")
                         }
+                        i.imageButton("image", Pair(100f, 20f)) {}
                     }
 
                     ImGui.showDemoWindow()
