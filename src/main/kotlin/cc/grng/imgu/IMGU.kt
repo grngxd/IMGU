@@ -209,6 +209,11 @@ class IMGU(val handle: Long = -1L) {
         window(name, 0, pos, size, r)
     }
 
+    fun window(name: String, flags: Int, pos: Pair<Float, Float>, r: Runnable) {
+        ImGui.setNextWindowPos(pos.first, pos.second)
+        window(name, flags, r)
+    }
+
     // you can pass a pair by doing Pair(1f, 1f)
     fun window(name: String, pos: Pair<Float, Float>, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second)
