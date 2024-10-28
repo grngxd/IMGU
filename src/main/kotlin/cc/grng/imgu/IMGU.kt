@@ -404,13 +404,16 @@ class IMGU(val handle: Long = -1L) {
         )
     }
 
+
     fun imageButton(name: String, wh: Pair<Float, Float>, r: Runnable): Map<String, Any> {
         val image = images[name] ?: throw IllegalArgumentException("Image $name not found")
         val id = image["id"] ?: throw IllegalArgumentException("Image $name does not have an id")
         val imgWidth = image["width"] ?: throw IllegalArgumentException("Image $name does not have a width")
         val imgHeight = image["height"] ?: throw IllegalArgumentException("Image $name does not have a height")
 
-        ImGui.imageButton(id as Int, wh.first, wh.second)
+        if (ImGui.imageButton(id as Int, wh.first, wh.second)) {
+            r.run()
+        }
 
         return mapOf(
             "id" to id,
