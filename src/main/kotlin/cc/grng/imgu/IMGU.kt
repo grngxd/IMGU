@@ -211,7 +211,7 @@ class IMGU(val handle: Long = -1L) {
         window(name, flags, r)
     }
 
-    fun window(name: String, flags: Int, pos: Pair<Float, Float>, cond: Int, pivot: Pair<Float, Float>, size: Pair<Float, Float>, r: Runnable) {
+    fun window(name: String, flags: Int, pos: Pair<Float, Float>, pivot: Pair<Float, Float>, cond: Int, size: Pair<Float, Float>, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second, cond, pivot.first, pivot.second)
         ImGui.setNextWindowSize(size.first, size.second)
         window(name, flags, r)
@@ -228,6 +228,10 @@ class IMGU(val handle: Long = -1L) {
 
     fun window(name: String, flags: Int, pos: Pair<Float, Float>, cond: Int, r: Runnable) {
         ImGui.setNextWindowPos(pos.first, pos.second, cond)
+        window(name, flags, r)
+    }
+    fun window(name: String, flags: Int, pos: Pair<Float, Float>, pivot: Pair<Float, Float>, cond: Int, r: Runnable) {
+        ImGui.setNextWindowPos(pos.first, pos.second, cond, pivot.first, pivot.second)
         window(name, flags, r)
     }
 
