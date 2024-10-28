@@ -263,7 +263,7 @@ class IMGU(val handle: Long = -1L) {
         }
     }
 
-    fun text(text: String, color: Int = 0xFFFFFFFF.toInt(), wrapped: Boolean = false) {
+    fun text(text: String, color: Int = ImGui.getColorU32(ImGuiCol.Text), wrapped: Boolean = false) {
         ImGui.pushStyleColor(ImGuiCol.Text, color)
         if (wrapped) {
             ImGui.textWrapped(text)
