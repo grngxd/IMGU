@@ -223,7 +223,7 @@ open class IMGU(val handle: Long = -1L) {
     }
 
     // Rendering
-    fun render(r: Runnable) {
+    open fun render(r: Runnable) {
         ImGui.setCurrentContext(ctx)
         newFrame()
 
@@ -232,7 +232,7 @@ open class IMGU(val handle: Long = -1L) {
         render()
     }
 
-    fun frame(r: Runnable) {
+    open fun frame(r: Runnable) {
         ImGui.setCurrentContext(ctx)
         newFrame()
 
