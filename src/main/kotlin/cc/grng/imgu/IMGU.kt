@@ -7,11 +7,13 @@ import imgui.flag.ImGuiCol
 import imgui.flag.ImGuiConfigFlags
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
+import imgui.internal.ImGuiContext
 import imgui.type.ImBoolean
 import imgui.type.ImFloat
 import imgui.type.ImInt
 import imgui.type.ImString
 import org.lwjgl.glfw.GLFW
+import java.awt.Color
 import java.io.InputStream
 
 class IMGU(val handle: Long = -1L) {
@@ -28,6 +30,8 @@ class IMGU(val handle: Long = -1L) {
 
     private var created = false
 
+    lateinit var ctx: ImGuiContext
+
     // Initialization
     open fun create(): IMGU {
         if (created) {
@@ -39,7 +43,9 @@ class IMGU(val handle: Long = -1L) {
             throw IllegalStateException("[IMGU] Display Handle provided is invalid. Has the display been created?")
         }
 
-        ImGui.createContext()
+        ctx = ImGui.createContext()
+        ImGui.setCurrentContext(ctx)
+
         val io = ImGui.getIO()
         io.iniFilename = null
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard)
@@ -115,20 +121,66 @@ class IMGU(val handle: Long = -1L) {
         ImGui.popFont()
     }
 
+    fun setStyle(imguStyle: IMGUStyle): IMGU {
+        val style = ImGui.getStyle()
+
+        imguStyle.javaClass.declaredFields.forEach { field ->
+            field.isAccessible = true
+            val methodName = "set${field.name[0].toUpperCase()}${field.name.substring(1)}"
+            val method = style.javaClass.methods.find { it.name == methodName }
+
+            if (method != null) {
+                when (field.type) {
+                    Float::class.java -> method.invoke(style, field.getFloat(imguStyle))
+                    FloatArray::class.java -> {
+                        val floatArray = field.get(imguStyle) as FloatArray
+                        when (floatArray.size) {
+                            1 -> method.invoke(style, floatArray[0])
+                            2 -> method.invoke(style, floatArray[0], floatArray[1])
+                            3 -> method.invoke(style, floatArray[0], floatArray[1], floatArray[2])
+                            4 -> method.invoke(style, floatArray[0], floatArray[1], floatArray[2], floatArray[3])
+                            else -> throw IllegalArgumentException("Unsupported FloatArray size: ${floatArray.size}")
+                        }
+                    }
+                    else -> {
+                        when (field.name) {
+                            "colors" -> {
+                                val colors = field.get(imguStyle) as HashMap<Int, Color>
+                                colors.forEach { (key, value) ->
+                                    style.setColor(key, value.red, value.green, value.blue, value.alpha)
+                                }
+                            }
+                            else -> throw IllegalArgumentException("Unsupported field type: ${field.type}")
+                        }
+                    }
+                }
+            } else {
+                println("Method $methodName not found for field ${field.name}")
+            }
+
+            println("Setting ${field.name} to ${field.get(imguStyle)}")
+        }
+
+        return this
+    }
+
     // Rendering
     fun render(r: Runnable) {
-        val width = IntArray(1)
-        val height = IntArray(1)
-        GLFW.glfwGetFramebufferSize(handle, width, height)
-        ImGui.getIO().setDisplaySize(width[0].toFloat(), height[0].toFloat())
-
-        imGuiGlfw.newFrame()
-        ImGui.newFrame()
+        ImGui.setCurrentContext(ctx)
+        newFrame()
 
         r.run()
 
-        ImGui.render()
-        imGuiGl3.renderDrawData(ImGui.getDrawData())
+        render()
+    }
+
+    fun frame(r: Runnable) {
+        ImGui.setCurrentContext(ctx)
+        newFrame()
+
+        r.run()
+
+        ImGui.endFrame()
     }
 
     fun newFrame() {
@@ -141,7 +193,7 @@ class IMGU(val handle: Long = -1L) {
         ImGui.newFrame()
     }
 
-    fun endFrame() {
+    fun render() {
         ImGui.render()
         imGuiGl3.renderDrawData(ImGui.getDrawData())
     }

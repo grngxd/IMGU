@@ -1,12 +1,16 @@
 import cc.grng.imgu.IMGU
+import cc.grng.imgu.IMGUStyle
 import imgui.ImGui
+import imgui.flag.ImGuiCol
 import org.junit.jupiter.api.Test
 import org.lwjgl.glfw.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
+import java.awt.Color
+import java.awt.Font.createFont
 
 class GUI {
-    lateinit var i: IMGU
+
 
     /*
         !!!!! Don't forget to run tests with the -Pdev property flag !!!!!
@@ -28,7 +32,7 @@ class GUI {
         GLFW.glfwMakeContextCurrent(handle)
         GL.createCapabilities()
 
-        i = IMGU(handle)
+        val i = IMGU(handle)
             .createFont(
                 "Roboto",
                 GUI::class.java.getResourceAsStream("/Roboto.ttf")!!,
@@ -40,6 +44,16 @@ class GUI {
                     "xlarge" to 32f
                 )
             ).create()
+
+        i.setStyle(
+            IMGUStyle().apply {
+                windowPadding = floatArrayOf(10f, 10f)
+                windowRounding = 10f
+                colors = hashMapOf(
+                    // ImGuiCol.WindowBg to Color.decode("#FF0000"),
+                )
+            }
+        )
 
         var counter = 0;
 

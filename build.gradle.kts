@@ -20,6 +20,11 @@ dependencies {
     if (project.hasProperty("dev")) {
         implementation(project(":dev"))
     }
+
+    compileOnly("org.projectlombok:lombok:1.18.28")
+    annotationProcessor("org.projectlombok:lombok:1.18.28")
+    testCompileOnly("org.projectlombok:lombok:1.18.28")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.28")
 }
 
 tasks.test {
