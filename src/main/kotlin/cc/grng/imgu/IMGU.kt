@@ -17,7 +17,7 @@ import java.awt.Color
 import java.io.InputStream
 import java.nio.ByteBuffer
 
-class IMGU(val handle: Long = -1L) {
+open class IMGU(val handle: Long = -1L) {
 
     companion object {
         val version = "0.1"
